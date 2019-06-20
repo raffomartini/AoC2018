@@ -39,4 +39,53 @@ Visually, these claim the following areas:
 The four square inches marked with X are claimed by both 1 and 2. (Claim 3, while adjacent to the others, does not overlap either of them.)
 
 If the Elves all proceed with their own plans, none of them will have enough fabric. How many square inches of fabric are within two or more claims?
+
+--- Part Two ---
+Amidst the chaos, you notice that exactly one claim doesn't overlap by even a single square inch of fabric with any other claim. If you can somehow draw attention to it, maybe the Elves will be able to make Santa's suit after all!
+
+For example, in the claims above, only claim 3 is intact after all claims are made.
+
+What is the ID of the only claim that doesn't overlap?
 '''
+
+import re
+import collections
+# FILE = 'test1.txt'
+FILE = 'input.txt'
+
+P = re.compile(r'#(\d+)\s@\s(\d+),(\d+):\s(\d+)x(\d+)\s*')
+
+'''
+s = '#1 @ 11,13: 49x57'
+m = p.match(s)
+m.groups() # -> ('1', '11', '13', '49', '57')
+'''
+
+def part1():
+
+    def parse(line):
+        m = P.match(line)
+        if m is not None:
+            result = *map(int, m.groups()),
+            return result
+
+    with open(FILE) as f:
+        input = [ parse(line) for line in f]
+    # n = claim number
+    # x = left origin
+    # y = top origin
+    # w = width
+    # h = height
+    claims_ =[(i+j*1j,n) for n,x,y,w,h in input for i in range(x,x+w) for j in range(y,y+h)]
+    claims = collections.defaultdict(int)
+    multiple_claims = collections.defaultdict(int)
+    for section, number in claims_:
+        claims[section] += 1
+        if claims[section] > 1:
+            multiple_claims[section] += 1
+    part1_out = 'part1: {}'.format(len(multiple_claims))
+    print(part1_out)
+
+
+if __name__ == '__main__':
+    part1()
