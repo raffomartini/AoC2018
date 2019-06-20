@@ -76,16 +76,22 @@ def part1():
     # y = top origin
     # w = width
     # h = height
-    claims_ =[(i+j*1j,n) for n,x,y,w,h in input for i in range(x,x+w) for j in range(y,y+h)]
+    claims1 =[(i+j*1j,n) for n,x,y,w,h in input for i in range(x,x+w) for j in range(y,y+h)]
     claims = collections.defaultdict(int)
     multiple_claims = collections.defaultdict(int)
-    for section, number in claims_:
+    for section, number in claims1:
         claims[section] += 1
         if claims[section] > 1:
             multiple_claims[section] += 1
     part1_out = 'part1: {}'.format(len(multiple_claims))
     print(part1_out)
 
+    claims2 = ( ([i + j*1j for i in range(x, x + w) for j in range(y, y + h)],n) for n, x, y, w, h in input)
+    for c, cn in claims2:
+        if all((multiple_claims[section] == 0 for section in c)):
+            part2_out = 'part1: {}'.format(cn)
+            print(part2_out)
+            break
 
 if __name__ == '__main__':
     part1()
