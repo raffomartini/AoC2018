@@ -70,11 +70,12 @@ In this example, it would take 15 seconds for two workers to complete these step
 With 5 workers and the 60+ second step durations described above, how long will it take to complete all of the steps?
 
 '''
-FILE = 'test.txt'
-FILE = 'input.txt'
+# FILE = 'test.txt' ; MAX_WORKERS = 2; OFFSET = 0
+FILE = 'input.txt'; MAX_WORKERS = 5; OFFSET = 60
 
 import re
 from collections import defaultdict
+from collections import namedtuple
 import itertools as it
 
 # def find_next(successors, predecessors, sequence):
@@ -92,24 +93,59 @@ def find_next(sequence, inventory, predecessors ):
     sequence = list(sequence) + list((next_,))
     return sequence
 
-def part1(instructions):
-    # successors = defaultdict(list)
-    predecessors = defaultdict(list)
-    inventory = set(it.chain(*zip(*instructions)))
-    for i,j in instructions:
-        # successors[i].append(j)
-        predecessors[j].append(i)
+def part1(predecessors,inventory):
     sequence = []
     # sequence = sorted(list(inventory - set((*zip(*instructions),)[1])))
     while len(sequence) < len(inventory):
         sequence = find_next(sequence,inventory,predecessors)
     print('Part1', ''.join(sequence))
 
+def find_next2(sequence, inventory, predecessors ):
+    # return [candidate for candidate in inventory-set(sequence) if all(p in sequence for p in predecessors[candidate]) and candidate not in sequence]
+    return sorted(
+        candidate for candidate in inventory - set(sequence)
+                  if all(p in sequence for p in predecessors[candidate])
+    )
+
+def task_lengh(task):
+    return ord(task) - ord('A') + OFFSET + 1
+
+def work(sequence, workers,inventory, predecessors):
+    tasks = [ t for t in find_next2(sequence,inventory,predecessors) if t not in workers.task]
+    idle = [ w for w, p_worker in enumerate(workers.progress) if p_worker==0]
+    for task,i in zip(tasks,idle):
+        workers.progress[i] = task_lengh(task)
+        workers.task[i] = task
+    t = min( p for p in workers.progress if p > 0 )
+    sequence = sequence + [t_ for p, t_ in zip(workers.progress, workers.task)
+                           if p == t]
+    workers.progress[:] = [ p - t  if p > 0 else 0 for p in workers.progress ]
+    workers.task[:] = [ None if p == 0 else t for p,t in zip(workers.progress,workers.task) ]
+    return t, sequence, workers
+
+
+def part2(predecessors,inventory):
+    sequence = []
+    Workers = namedtuple('Workers', ('progress', 'task'))
+    workers = Workers([0 for i in range(MAX_WORKERS)], [None for i in range(MAX_WORKERS)])
+    t = 0
+    while len(sequence) < len(inventory):
+        t_,sequence, workers = work(sequence,workers,inventory, predecessors)
+        t += t_
+        print(t, workers, sequence)
+    print('Part2: ', t)
+
 with open(FILE) as f:
     input = f.readlines()
 p = re.compile(r'Step (\w) must be finished before step (\w) can begin.\n')
 instructions = [p.match(line).groups() for line in input]
+predecessors = defaultdict(list)
+inventory = set(it.chain(*zip(*instructions)))
+for i, j in instructions:
+    # successors[i].append(j)
+    predecessors[j].append(i)
 
 
 
-part1(instructions)
+# part1(instructions)
+part2(predecessors,inventory)
