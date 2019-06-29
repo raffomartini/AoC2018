@@ -51,6 +51,7 @@ Here are a few more examples:
 
 import re
 import itertools as it
+from collections import deque
 
 TEST = '''\
 10 players; last marble is worth 1618 points: high score is 8317
@@ -84,15 +85,25 @@ def part1(input_):
         players_score[player] += score
     print('Part1: ', max(players_score))
 
+def game(n_marbles):
+    circle = deque([0])
+    for i in range(23,n_marbles+1,23):
+        for j in range(i-22,i):
+            circle.rotate(-1)
+            circle.append(j)
+        circle.rotate(7)
+        yield i, i + circle.pop()
+        circle.rotate(-1)
+
+
 def part2(input_):
     n_players, n_marbles = *map(int, p.match(input_).groups()),
     n_marbles = 100 * n_marbles
     players_score = [0 for player in range(n_players)]
-    circle = [0] ; current_position = 0
-    for player, marble in zip(it.cycle(range(n_players)),range(1, n_marbles+1)):
-        circle, current_position, score = step(circle,current_position,marble)
+    for marble, score in game(n_marbles):
+        player = marble % n_players
         players_score[player] += score
-    print('Part1: ', max(players_score))
+    print('Part2: ', max(players_score))
 
 #
 # for input_ in TEST:
