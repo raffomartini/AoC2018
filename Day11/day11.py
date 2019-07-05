@@ -65,7 +65,7 @@ def part2(serial= PUZZLE_INPUT):
         return [l.copy() for l in grid]
     s_grid = copy_table(grid)
     for s in range(300):
-        print(s)
+        # print(s)
         for y in range(300 - s):
             for x in range(300 - s):
                 s_power = s_grid[y][x] + sum(grid[yy][x+s] for yy in range(y,y+s)) + sum(grid[y+s][x:x+s+1])
