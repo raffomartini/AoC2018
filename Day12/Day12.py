@@ -2,6 +2,7 @@
 
 '''
 import re
+from collections import Counter
 
 FILE = 'test.txt'
 FILE = 'input.txt'
@@ -30,7 +31,7 @@ def part1(file=FILE,iter=20):
     with open(file) as f:
         line = f.readline()
         start_ = p_init.match(line).group(1)
-        evolution = dict(p_evolution.match(line).groups() for line in f.readlines() if p_evolution.match(line))
+        evolution = dict(p_evolution.match(l).groups() for l in f.readlines() if p_evolution.match(l))
     line = start_
     i_zero=0
     for i in range(iter):
@@ -41,8 +42,34 @@ def part1(file=FILE,iter=20):
     print('Part1: ', result)
     print(line, i_zero)
 
-def part2(file=FILE):
-    solve(file,50000000000)
+def part2(iter=50000000000, file=FILE):
+    # iter = 20
+    p_init = re.compile(r'initial state: (.*)')
+    p_evolution = re.compile(r'(.{5}) => (.)')
+    with open(file) as f:
+        line = f.readline()
+        start_ = p_init.match(line).group(1)
+        evolution = [p_evolution.match(l).group(1) for l in f.readlines() if p_evolution.match(l) and p_evolution.match(l).group(2)=='#' ]
+    state = [ i for i, c in enumerate(start_) if c =='#']
 
-part1()
-# part2()
+    def evolve(state,evolution=evolution):
+        possibilities = set(j for s in (range(i - 1, i + 2) for i in state) for j in s)
+        # blocks = (''.join('#' if j in state else '.' for j in range(i - 2, i + 3)) for i in possibilities)
+        return [i for i in possibilities if ''.join('#' if j in state else '.' for j in range(i - 2, i + 3)) in evolution]
+
+    diff = []
+    score_ = 0
+    for i in range(iter):
+        state = evolve(state)
+        score = sum(state)
+        diff.append(score - score_)
+        score_ = score
+        if len(diff) > 100:
+            diff.pop(0)
+            if all(i == diff[0] for i in diff):
+                break
+    result = score + (iter - i ) * diff[0]
+    print('Part2: ', result)
+
+# part1()
+part2()
