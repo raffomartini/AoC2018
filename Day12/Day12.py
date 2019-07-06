@@ -68,7 +68,7 @@ def part2(iter=50000000000, file=FILE):
             diff.pop(0)
             if all(i == diff[0] for i in diff):
                 break
-    result = score + (iter - i ) * diff[0]
+    result = score + (iter - i -1 ) * diff[0]
     print('Part2: ', result)
 
 # part1()
